@@ -1,8 +1,9 @@
 package kr.ac.ajou.ajouinoclient.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Device
@@ -44,7 +45,14 @@ public class Device extends DeviceInfo {
     }
 
     public void setEvents(List<Event> events) {
+        Collections.sort(events);
         this.events = events;
+    }
+
+    public void addEvent(Event event) {
+        if(events == null) events = new ArrayList<>();
+        events.add(event);
+        Collections.sort(events);
     }
 
     public Date getCreateDate() {

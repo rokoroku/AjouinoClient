@@ -2,20 +2,18 @@ package kr.ac.ajou.ajouinoclient.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.model.Device;
-import kr.ac.ajou.ajouinoclient.model.DeviceInfo;
+import kr.ac.ajou.ajouinoclient.model.Event;
 
 /**
  * Created by YoungRok on 2014-11-26.
@@ -24,8 +22,9 @@ public class PowerstripOutletAdapter extends BaseAdapter {
 
     private Context mContext;
     private LayoutInflater mInflater;
-    private Map<String, Integer> mItems;
-    private List<Map.Entry<String, Integer>> mListItems;
+    private SparseBooleanArray mListItems;
+
+    private OnValueChangedListener mValueChangedListener;
 
     public PowerstripOutletAdapter(Context context) {
         mContext = context;
@@ -39,20 +38,47 @@ public class PowerstripOutletAdapter extends BaseAdapter {
     }
 
     public void setItem(Device device) {
-        mItems = device.getValues();
-        mListItems = new ArrayList<>(mItems.entrySet());
+
+        Integer ports = device.getValues().get("ports");
+        if(ports == null) ports = 0;
+
+        mListItems = new SparseBooleanArray();
+
+        Event event = null;
+        if(device.getEvents() != null && device.getEvents().size() > 0) {
+            event = device.getEvents().get(0);
+        }
+
+        int value = 0;
+        if(event != null && event.getValue() != null) {
+            value = event.getValue();
+        }
+
+        for(int i=0; i<ports; i++) {
+            mListItems.put(i, (value & 1) == 1);
+            value = value >> 1;
+        }
     }
 
     public int getCount() {
-        return mItems.size();
+        return mListItems.size();
     }
 
-    public Map.Entry<String, Integer> getItem(int position) {
-        if (position < mItems.size()) {
+    public Boolean getItem(int position) {
+        if (position < mListItems.size()) {
             return mListItems.get(position);
         } else {
             return null;
         }
+    }
+
+    public int getValue() {
+        int value = 0;
+        for(int i=getCount(); i>=0; i--) {
+            if(mListItems.get(i)) value += 1;
+            value = value << 1;
+        }
+        return value >> 1;
     }
 
     public long getItemId(int position) {
@@ -60,24 +86,34 @@ public class PowerstripOutletAdapter extends BaseAdapter {
     }
 
     // create a new ImageView for each item referenced by the Adapter
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
 
         if (convertView == null) {  // if it's not recycled, initialize some attributes
-            convertView = mInflater.inflate(R.layout.item_powerstrip_swtich, null);
+            convertView = mInflater.inflate(R.layout.item_powerstrip_switch_card, null);
         }
+
 
         TextView labelView = (TextView) convertView.findViewById(R.id.label);
         TextView descriptionView = (TextView) convertView.findViewById(R.id.description);
+        Switch switchView = (Switch) convertView.findViewById(R.id.power_switch);
 
         String label = null;
         String description = null;
 
-        if (position < mItems.size()) {
+        if (position < mListItems.size()) {
 
-            Map.Entry<String, Integer> entry = getItem(position);
-            label = entry.getKey();
-            description = String.valueOf(entry.getValue());
-
+            label = "port " + position;
+            description = String.valueOf(getItem(position));
+            switchView.setChecked(getItem(position));
+            switchView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if(mListItems.get(position) != b) {
+                        toggleSwitch(position);
+                    }
+                }
+            });
+            switchView.setFocusable(false);
         }
 
         if (label != null) labelView.setText(label);
@@ -86,4 +122,21 @@ public class PowerstripOutletAdapter extends BaseAdapter {
         return convertView;
     }
 
+    public void toggleSwitch(int position) {
+        if (position < mListItems.size()) {
+            mListItems.put(position, !mListItems.get(position));
+            notifyDataSetChanged();
+            if(mValueChangedListener != null) {
+                mValueChangedListener.onValuedChanged();
+            }
+        }
+    }
+
+    public void setValueChangedListener(OnValueChangedListener mValueChangedListener) {
+        this.mValueChangedListener = mValueChangedListener;
+    }
+
+    public interface OnValueChangedListener {
+        public void onValuedChanged();
+    }
 }

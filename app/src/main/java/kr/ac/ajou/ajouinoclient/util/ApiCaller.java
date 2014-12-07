@@ -9,7 +9,6 @@ import com.google.gson.reflect.TypeToken;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -31,6 +30,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import kr.ac.ajou.ajouinoclient.model.Device;
 import kr.ac.ajou.ajouinoclient.model.DeviceInfo;
 import kr.ac.ajou.ajouinoclient.model.Event;
+import kr.ac.ajou.ajouinoclient.model.User;
 
 /**
  * Created by YoungRok on 2014-11-26.
@@ -67,6 +67,10 @@ public class ApiCaller {
         ApiCaller.instance = instance;
     }
 
+    public String getHostAddress() {
+        return hostAddress;
+    }
+
     public boolean postEvent(Event event) throws ApiException {
         StringBuilder sb = new StringBuilder()
                 .append(hostAddress)
@@ -82,11 +86,36 @@ public class ApiCaller {
         callAPIAsync(param);
     }
 
+    public void postUserAsync(User user, Callback callback) {
+        TaskRequestParam param = new TaskRequestParam(HTTP_POST, user, callback);
+        callAPIAsync(param);
+    }
+
+    public User postUser(User user) throws ApiException {
+        StringBuilder sb = new StringBuilder()
+                .append(hostAddress)
+                .append("user/")
+                .append(user.getId())
+                .append("/");
+        String respond = request(HTTP_POST, sb.toString(), gson.toJson(user));
+        return gson.fromJson(respond, User.class);
+    }
+
     public Device postDevice(Device device) throws ApiException {
         StringBuilder sb = new StringBuilder()
                 .append(hostAddress)
                 .append("device/");
         String respond = request(HTTP_POST, sb.toString(), gson.toJson(device));
+        return gson.fromJson(respond, Device.class);
+    }
+
+    public Device putDevice(Device device) throws ApiException {
+        StringBuilder sb = new StringBuilder()
+                .append(hostAddress)
+                .append("device/")
+                .append(device.getId())
+                .append("/");
+        String respond = request(HTTP_PUT, sb.toString(), gson.toJson(device));
         return gson.fromJson(respond, Device.class);
     }
 
@@ -106,7 +135,7 @@ public class ApiCaller {
 
     public void getDeviceAsync(String deviceId, Callback callback) {
         DeviceInfo deviceInfo = new DeviceInfo();
-        deviceInfo.setType("registered");
+        deviceInfo.setId(deviceId);
         TaskRequestParam param = new TaskRequestParam(HTTP_GET, deviceInfo, callback);
         callAPIAsync(param);
     }
@@ -154,10 +183,24 @@ public class ApiCaller {
         return gson.fromJson(respond, Device.class);
     }
 
-    public void removeDeviceAsync(String deviceId, Callback callback) {
-        DeviceInfo deviceInfo = new DeviceInfo();
-        deviceInfo.setId(deviceId);
-        TaskRequestParam param = new TaskRequestParam(HTTP_DELETE, deviceId, callback);
+    public void removeDeviceAsync(DeviceInfo deviceInfo, Callback callback) {
+        TaskRequestParam param = new TaskRequestParam(HTTP_DELETE, deviceInfo, callback);
+        callAPIAsync(param);
+    }
+
+    public Event removeEvent(Event event) throws ApiException {
+        StringBuilder sb = new StringBuilder()
+                .append(hostAddress)
+                .append("device/")
+                .append(event.getDeviceID())
+                .append("/")
+                .append(event.getTimestamp().getTime());
+        String respond = request(HTTP_DELETE, sb.toString(), null);
+        return gson.fromJson(respond, Event.class);
+    }
+
+    public void removeEventAsync(Event event, Callback callback) {
+        TaskRequestParam param = new TaskRequestParam(HTTP_DELETE, event, callback);
         callAPIAsync(param);
     }
 
@@ -170,7 +213,7 @@ public class ApiCaller {
             case HTTP_POST:
                 httpRequest = new HttpPost(URL);
                 if (entity != null) try {
-                    ((HttpPost) httpRequest).setEntity(new StringEntity(entity));
+                    ((HttpPost) httpRequest).setEntity(new StringEntity(entity, "UTF-8"));
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
@@ -178,7 +221,7 @@ public class ApiCaller {
             case HTTP_PUT:
                 httpRequest = new HttpPut(URL);
                 if (entity != null) try {
-                    ((HttpPut) httpRequest).setEntity(new StringEntity(entity));
+                    ((HttpPut) httpRequest).setEntity(new StringEntity(entity, "UTF-8"));
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
@@ -193,40 +236,49 @@ public class ApiCaller {
     }
 
     private String request(int method, String URL, String entity) throws ApiException {
+        AndroidHttpClient androidHttpClient = null;
         try {
-            HttpClient httpClient = AndroidHttpClient.newInstance("Ajouino/Android");
+            androidHttpClient = AndroidHttpClient.newInstance("Ajouino/Android");
             HttpRequest httpRequest = generateHttpRequest(method, URL, entity);
             Log.d(this.getClass().getSimpleName(), "Requesting " + httpRequest.getRequestLine().getMethod() + " " + httpRequest.getRequestLine().getUri());
 
             int timeoutConnection = 10000;
             int timeoutSocket = 20000;
-            HttpParams httpParameters = httpClient.getParams();
+            HttpParams httpParameters = androidHttpClient.getParams();
             HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
             HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
 
             httpRequest.setHeader("Content-Type", "application/json");
             if (authToken != null) httpRequest.setHeader("Authorization", "Basic " + authToken);
 
-            HttpResponse response = httpClient.execute((HttpUriRequest) httpRequest);
+            HttpResponse response = androidHttpClient.execute((HttpUriRequest) httpRequest);
 
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == 200) {
-                return EntityUtils.toString(response.getEntity());
+                String result = EntityUtils.toString(response.getEntity(), "UTF-8");
+                androidHttpClient.close();
+                return result;
             } else {
                 String statusMessage = response.getStatusLine().getReasonPhrase();
+                androidHttpClient.close();
                 throw new ApiException(statusCode, statusMessage);
             }
 
         } catch (IOException e) {
             e.printStackTrace();
+            androidHttpClient.close();
             throw new ApiException(ApiException.ERROR_BAD_REQUEST, e.getMessage());
         }
     }
 
     public boolean authenticate(String authToken) throws ApiException {
         this.authToken = authToken;
-        String response = request(HTTP_GET, hostAddress + "session/", null);
+        String response = request(HTTP_GET, hostAddress + "user/authenticate/", null);
         return true;
+    }
+
+    public String getAuthToken() {
+        return authToken;
     }
 
     private class TaskRequestParam {
@@ -271,7 +323,7 @@ public class ApiCaller {
                             if (deviceInfo.getId() != null) {
                                 return getDevice(deviceInfo.getId());
                             } else if (deviceInfo.getType() == null) {
-                                    return getDevices();
+                                return getDevices();
                             } else if (deviceInfo.getType().equals("lookup")) {
                                 return getAllDevicesOnNetwork();
                             }
@@ -284,15 +336,28 @@ public class ApiCaller {
                         } else if (requestParam.param instanceof Device) {
                             Device device = (Device) requestParam.param;
                             return postDevice(device);
+                        } else if (requestParam.param instanceof User) {
+                            User user = (User) requestParam.param;
+                            return postUser(user);
                         }
-
                         break;
                     case HTTP_PUT:
+//                        if (requestParam.param instanceof User) {
+//                            User user = (User) requestParam.param;
+//                            return putUser(user);
+//                        } else if (requestParam.param instanceof Device) {
+//                            Device device = (Device) requestParam.param;
+//                            return putDevice(device);
+//                        }
                         break;
                     case HTTP_DELETE:
-                        if (requestParam.param instanceof Device) {
-                            Device device = (Device) requestParam.param;
-                            removeDevice(device.getId());
+                        if (requestParam.param instanceof DeviceInfo) {
+                            DeviceInfo deviceInfo = (DeviceInfo) requestParam.param;
+                            removeDevice(deviceInfo.getId());
+                            return true;
+                        } else if (requestParam.param instanceof Event) {
+                            Event event = (Event) requestParam.param;
+                            removeEvent(event);
                             return true;
                         }
                         break;
@@ -300,7 +365,8 @@ public class ApiCaller {
                         return null;
                 }
 
-            } catch (Exception e) {
+            } catch (ApiException e) {
+                errorCode = e.getErrorCode();
                 Log.e(this.getClass().getSimpleName(), e.getMessage() + ", method: " + requestParam.method + ", param: " + requestParam.param);
             }
 
@@ -310,13 +376,14 @@ public class ApiCaller {
         @Override
         protected void onPostExecute(Object result) {
             apiCallTask = null;
+            Log.d(this.getClass().getSimpleName(), "Result:" + (result == null ? result : result.toString()) );
 
             synchronized (requestQueue) {
                 //execute callbacks
                 requestQueue.poll();
                 if (requestParam.callback != null) {
                     // call success callback if result is not null
-                    if (result != null) requestParam.callback.onSuccess(result);
+                    if (result != null || errorCode != null && errorCode.equals(ApiException.ERROR_DATA_NOT_FOUND)) requestParam.callback.onSuccess(result);
                     else requestParam.callback.onFailure();
                 }
 

@@ -6,16 +6,20 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 
-import kr.ac.ajou.ajouinoclient.fragments.DeviceFragment;
-import kr.ac.ajou.ajouinoclient.fragments.NavigationDrawerFragment;
+import kr.ac.ajou.ajouinoclient.fragment.DeviceFragment;
+import kr.ac.ajou.ajouinoclient.fragment.NavigationDrawerFragment;
 import kr.ac.ajou.ajouinoclient.model.Device;
 import kr.ac.ajou.ajouinoclient.model.Event;
+import kr.ac.ajou.ajouinoclient.persistent.DeviceManager;
 import kr.ac.ajou.ajouinoclient.util.ApiCaller;
 import kr.ac.ajou.ajouinoclient.util.Callback;
 
@@ -23,6 +27,8 @@ import kr.ac.ajou.ajouinoclient.util.Callback;
 public class DeviceActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         DeviceFragment.OnDeviceFragmentInteractionListener {
+
+    public static final String PARAM_DEVICE_ID = "deviceId";
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -33,6 +39,7 @@ public class DeviceActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    private Device mDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,19 +56,18 @@ public class DeviceActivity extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
         Intent intent = getIntent();
-        if(intent != null) {
-            String param = intent.getStringExtra("deviceId");
-            if(param != null) {
+        if (intent != null) {
+            String param = intent.getStringExtra(PARAM_DEVICE_ID);
+            if (param != null) {
                 replaceDeviceFragment(param);
             }
         }
     }
 
-
     @Override
     public void onNavigationDrawerItemSelected(String param) {
         // update the main content by replacing fragments
-        if(param != null) replaceDeviceFragment(param);
+        if (param != null) replaceDeviceFragment(param);
     }
 
     public void replaceDeviceFragment(String deviceId) {
@@ -79,14 +85,13 @@ public class DeviceActivity extends ActionBarActivity
         actionBar.setTitle(mTitle);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!mNavigationDrawerFragment.isDrawerOpen()) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.device, menu);
+            getMenuInflater().inflate(R.menu.menu_device, menu);
             restoreActionBar();
             return true;
         }
@@ -101,16 +106,129 @@ public class DeviceActivity extends ActionBarActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_delete) {
+            ApiCaller.getStaticInstance().removeDeviceAsync(mDevice, new Callback() {
+                @Override
+                public void onSuccess(Object result) {
+                    Device device = DeviceManager.getInstance().removeDevice(mDevice.getId());
+                    onRemoveDevice(device);
+                    finish();
+                }
+
+                @Override
+                public void onFailure() {
+                    Snackbar.with(DeviceActivity.this)
+                            .text("Failed to remove device")
+                            .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
+                            .show(DeviceActivity.this);
+                }
+            });
             return true;
+
+        } else if (id == R.id.action_refresh) {
+            if (mDevice != null) {
+                ApiCaller.getStaticInstance().getDeviceAsync(mDevice.getId(), new Callback() {
+                    @Override
+                    public void onSuccess(Object result) {
+                        Device device = (Device) result;
+                        if (device != null) {
+                            DeviceManager.getInstance().putDevice(device);
+                            replaceDeviceFragment(device.getId());
+
+                            Snackbar.with(DeviceActivity.this)
+                                    .text("Contents are updated.")
+                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
+                                    .show(DeviceActivity.this);
+                        } else {
+                            Snackbar.with(DeviceActivity.this)
+                                    .text("Failed to update content.")
+                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
+                                    .show(DeviceActivity.this);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        Snackbar.with(DeviceActivity.this)
+                                .text("Failed to refresh.")
+                                .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
+                                .show(DeviceActivity.this);
+                    }
+                });
+            }
+            return true;
+
+        } else if (id == R.id.action_edit_label) {
+            if (mDevice != null) {
+                changeLabel(mDevice);
+            }
+            return true;
+
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    private void changeLabel(final Device device) {
+        MaterialDialog dialog = new MaterialDialog.Builder(this)
+                .title("Change Label")
+                .customView(R.layout.dialog_layout_edittext)
+                .positiveText("Submit")
+                .negativeText("Cancel")
+                .callback(new MaterialDialog.SimpleCallback() {
+                    @Override
+                    public void onPositive(final MaterialDialog materialDialog) {
+                        String label = ((EditText) materialDialog.getCustomView().findViewById(R.id.editText)).getText().toString();
+                        if (label != null && !label.isEmpty()) {
+                            mDevice.setLabel(label);
+                            ApiCaller.getStaticInstance().postDeviceAsync(mDevice, new Callback() {
+                                @Override
+                                public void onSuccess(Object result) {
+                                    Snackbar.with(DeviceActivity.this)
+                                            .text("Label changed")
+                                            .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
+                                            .show(DeviceActivity.this);
+
+                                }
+
+                                @Override
+                                public void onFailure() {
+                                    Snackbar.with(DeviceActivity.this)
+                                            .text("Failed to change label")
+                                            .actionLabel("RETRY")
+                                            .actionColorResource(R.color.accent)
+                                            .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
+                                            .actionListener(new ActionClickListener() {
+                                                @Override
+                                                public void onActionClicked() {
+                                                    onPositive(materialDialog);
+                                                }
+                                            })
+                                            .show(DeviceActivity.this);
+                                }
+                            });
+
+                            mTitle = label;
+                            restoreActionBar();
+                        }
+                    }
+                })
+                .build();
+
+        EditText editText = (EditText) dialog.getCustomView().findViewById(R.id.editText);
+        editText.setHint(R.string.hint_edit_label);
+        editText.setText(mDevice.getLabel());
+        editText.setEnabled(true);
+
+        dialog.show();
+    }
+
     @Override
     public void onDeviceFragmentAttached(Device device) {
-        if(device != null) mTitle = device.getLabel();
+        if (device != null) {
+            mTitle = device.getLabel();
+            mDevice = device;
+        }
     }
 
     @Override
@@ -135,7 +253,7 @@ public class DeviceActivity extends ActionBarActivity
                                 onToggleEvent(event);
                             }
                         })
-                        .actionColor(R.color.accent)
+                        .actionColorResource(R.color.accent)
                         .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
                         .show(DeviceActivity.this);
             }
@@ -144,12 +262,10 @@ public class DeviceActivity extends ActionBarActivity
     }
 
     @Override
-    public void onRemoveDevice(Device device) {
-        Snackbar.with(DeviceActivity.this)
+    public void onRemoveDevice(final Device device) {
+        Snackbar.with(this)
                 .text("Device removed")
-                .actionLabel("Undo")
-                .actionColor(R.color.accent)
                 .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
-                .show(DeviceActivity.this);
+                .show(this);
     }
 }

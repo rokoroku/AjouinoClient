@@ -5,12 +5,13 @@ import java.util.Date;
 /**
  * Created by YoungRok on 2014-11-25.
  */
-public class Event {
+public class Event implements Comparable {
 
     public static final String TYPE_DIGITAL = "digital";
     public static final String TYPE_ANALOG = "analog";
     public static final String TYPE_COLOR = "color";
-    public static final String TYPE_INFO = "hello";
+    public static final String TYPE_GUEST = "guest";
+    public static final String TYPE_POWER = "power";
 
     String deviceID;
     String type;
@@ -43,7 +44,7 @@ public class Event {
         this.type = type;
     }
 
-    public int getValue() {
+    public Integer getValue() {
         return value;
     }
 
@@ -57,5 +58,10 @@ public class Event {
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return this.timestamp.compareTo(((Event)o).getTimestamp()) * -1;
     }
 }

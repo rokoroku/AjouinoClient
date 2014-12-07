@@ -1,26 +1,25 @@
-package kr.ac.ajou.ajouinoclient.fragments;
+package kr.ac.ajou.ajouinoclient.fragment;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 
 import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.model.Device;
 import kr.ac.ajou.ajouinoclient.model.Event;
-import kr.ac.ajou.ajouinoclient.util.DeviceManager;
+import kr.ac.ajou.ajouinoclient.persistent.DeviceManager;
 
 /**
  * A fragment representing a list of Items.
  */
-public class DeviceFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class DeviceFragment extends Fragment {
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "deviceId";
+
     protected String mDeviceId;
     protected Device mDevice;
     protected OnDeviceFragmentInteractionListener mListener;
@@ -29,10 +28,14 @@ public class DeviceFragment extends Fragment implements AdapterView.OnItemClickL
     public static DeviceFragment newInstance(String deviceId) {
 
         Device device = DeviceManager.getInstance().getDevice(deviceId);
-        String deviceType = device.getType();
+
+        String deviceType = "";
+        if(device != null) deviceType = device.getType();
+
         DeviceFragment fragment = null;
         if(deviceType.equals(Device.TYPE_LAMP)) fragment = new LampFragment();
         else if(deviceType.equals(Device.TYPE_POWERSTRIP)) fragment = new PowerstripFragment();
+        else if(deviceType.equals(Device.TYPE_INTERCOM)) fragment = new IntercomFragment();
         else fragment = new DeviceFragment();
 
         Bundle args = new Bundle();
@@ -85,18 +88,6 @@ public class DeviceFragment extends Fragment implements AdapterView.OnItemClickL
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        //must implement this in child fragment
-//        if (null != mListener) {
-            // TODO: Invoke listener
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-//            mListener.onToggleEvent(DummyContent.ITEMS.get(position).id);
-//        }
-
     }
 
     /**

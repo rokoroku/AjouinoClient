@@ -6,15 +6,22 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <permission android:name="kr.ac.ajou.ajouinoclient.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="kr.ac.ajou.ajouinoclient.permission.C2D_MESSAGE" />
 
     <application
-        android:name="kr.ac.ajou.ajouinoclient.util.PreferenceManager"
+        android:name=".persistent.PreferenceManager"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="kr.ac.ajou.ajouinoclient.MainActivity"
+            android:name=".DeviceListActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,22 +30,36 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="kr.ac.ajou.ajouinoclient.LoginActivity"
+            android:name=".LoginActivity"
             android:label="@string/title_activity_login"
             android:windowSoftInputMode="adjustResize|stateVisible" >
         </activity>
         <activity
-            android:name="kr.ac.ajou.ajouinoclient.DeviceActivity"
+            android:name=".DeviceActivity"
             android:label="@string/title_activity_device" >
         </activity>
         <activity
-            android:name="kr.ac.ajou.ajouinoclient.DeviceLookupActivity"
+            android:name=".DeviceLookupActivity"
             android:label="@string/title_activity_device_lookup"
-            android:parentActivityName="kr.ac.ajou.ajouinoclient.MainActivity" >
+            android:parentActivityName=".DeviceListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="kr.ac.ajou.ajouinoclient.MainActivity" />
+                android:value=".DeviceListActivity" />
         </activity>
+
+        <receiver
+            android:name=".service.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="com.example.gcm" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".service.GcmIntentService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

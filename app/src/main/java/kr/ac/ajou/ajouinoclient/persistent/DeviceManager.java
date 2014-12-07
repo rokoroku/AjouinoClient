@@ -1,4 +1,4 @@
-package kr.ac.ajou.ajouinoclient.util;
+package kr.ac.ajou.ajouinoclient.persistent;
 
 import java.util.Collection;
 import java.util.Hashtable;

@@ -1,10 +1,9 @@
-package kr.ac.ajou.ajouinoclient.util;
+package kr.ac.ajou.ajouinoclient.persistent;
 
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.util.Hashtable;
 import java.util.Map;
 
 /**

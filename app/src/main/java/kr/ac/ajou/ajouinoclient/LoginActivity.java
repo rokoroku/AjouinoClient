@@ -21,7 +21,8 @@ import android.widget.TextView;
 
 import kr.ac.ajou.ajouinoclient.util.ApiCaller;
 import kr.ac.ajou.ajouinoclient.util.ApiException;
-import kr.ac.ajou.ajouinoclient.util.PreferenceManager;
+import kr.ac.ajou.ajouinoclient.util.GcmUtils;
+import kr.ac.ajou.ajouinoclient.persistent.PreferenceManager;
 
 
 /**
@@ -126,7 +127,6 @@ public class LoginActivity extends ActionBarActivity {
             cancel = true;
         }
 
-
         // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
@@ -227,6 +227,7 @@ public class LoginActivity extends ActionBarActivity {
                     return 200;
                 }
             } catch (ApiException e) {
+                e.printStackTrace();
                 return e.getErrorCode();
             }
             return 0;
@@ -239,7 +240,8 @@ public class LoginActivity extends ActionBarActivity {
 
             switch (statusCode) {
                 case 200:
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    GcmUtils.register(getApplicationContext());
+                    Intent intent = new Intent(LoginActivity.this, DeviceListActivity.class);
                     startActivity(intent);
                     finish();
                     break;

@@ -2,6 +2,9 @@ package kr.ac.ajou.ajouinoclient.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.support.v7.widget.CardView;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +17,6 @@ import java.util.Collection;
 import java.util.List;
 
 import kr.ac.ajou.ajouinoclient.R;
-import kr.ac.ajou.ajouinoclient.model.Device;
 import kr.ac.ajou.ajouinoclient.model.DeviceInfo;
 
 /**
@@ -25,9 +27,11 @@ public class DeviceGridAdapter extends BaseAdapter {
     private Context mContext;
     private LayoutInflater mInflater;
     private List<DeviceInfo> mListItems;
+    private SparseBooleanArray mSelectedItemsIds;
 
     public DeviceGridAdapter(Context context) {
         mContext = context;
+        mSelectedItemsIds = new SparseBooleanArray();
         if (context instanceof Activity) {
             setLayoutInflator(((Activity) context).getLayoutInflater());
         }
@@ -61,11 +65,12 @@ public class DeviceGridAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         if (convertView == null) {  // if it's not recycled, initialize some attributes
-            convertView = mInflater.inflate(R.layout.item_add_device, null);
+            convertView = mInflater.inflate(R.layout.item_device_card, null);
         }
         ImageView iconView = (ImageView) convertView.findViewById(R.id.image);
         TextView labelView = (TextView) convertView.findViewById(R.id.label);
         TextView descriptionView = (TextView) convertView.findViewById(R.id.description);
+        CardView cardView = (CardView) convertView.findViewById(R.id.cardView);
 
         Integer imageRes = null;
         String label = null;
@@ -95,6 +100,19 @@ public class DeviceGridAdapter extends BaseAdapter {
         } else {
             descriptionView.setVisibility(View.INVISIBLE);
         }
+        if(mSelectedItemsIds.size() > 0) {
+            if (mSelectedItemsIds.get(position)) {
+                cardView.setCardBackgroundColor(Color.WHITE);
+                cardView.setCardElevation(0);
+            }
+            else {
+                cardView.setCardBackgroundColor(Color.LTGRAY);
+                cardView.setCardElevation(4);
+            }
+        } else {
+            cardView.setCardBackgroundColor(Color.WHITE);
+            cardView.setCardElevation(4);
+        }
 
         return convertView;
     }
@@ -107,4 +125,32 @@ public class DeviceGridAdapter extends BaseAdapter {
         else if (type.equalsIgnoreCase("intercom")) return R.drawable.icon_intercom;
         else return R.drawable.icon_arduino;
     }
+
+    public void toggleSelection(int position) {
+        selectView(position, !mSelectedItemsIds.get(position));
+    }
+
+    public void removeSelection() {
+        mSelectedItemsIds = new SparseBooleanArray();
+        notifyDataSetChanged();
+    }
+
+    public void selectView(int position, boolean value) {
+        if (value) {
+            mSelectedItemsIds.put(position, value);
+        }
+        else {
+            mSelectedItemsIds.delete(position);
+        }
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedCount() {
+        return mSelectedItemsIds.size();
+    }
+
+    public SparseBooleanArray getSelectedIds() {
+        return mSelectedItemsIds;
+    }
+
 }

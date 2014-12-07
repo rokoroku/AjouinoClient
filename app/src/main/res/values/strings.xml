@@ -15,5 +15,9 @@
     <string name="title_activity_device_lookup">Add Device</string>
     <string name="string_password">Password</string>
     <string name="action_refresh">Refresh</string>
+    <string name="menu_delete">Delete</string>
+    <string name="action_logout">Log out</string>
+    <string name="action_edit_label">Edit Label</string>
+    <string name="hint_edit_label">Enter new label</string>
 
 </resources>

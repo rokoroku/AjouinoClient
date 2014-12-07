@@ -21,12 +21,13 @@
         android:id="@+id/gridview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:choiceMode="none"
+        android:choiceMode="multipleChoice"
         android:numColumns="2"
         android:stretchMode="columnWidth"
         android:touchscreenBlocksFocus="false"
         android:stackFromBottom="false"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:drawSelectorOnTop="false">
 
     </GridView>
 

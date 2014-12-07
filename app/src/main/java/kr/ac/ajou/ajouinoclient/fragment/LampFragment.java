@@ -1,13 +1,11 @@
-package kr.ac.ajou.ajouinoclient.fragments;
+package kr.ac.ajou.ajouinoclient.fragment;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
 //import com.larswerkman.holocolorpicker.ColorPicker;
 //import com.larswerkman.holocolorpicker.OpacityBar;
@@ -18,9 +16,6 @@ import com.chiralcode.colorpicker.ColorPicker;
 
 import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.model.Event;
-import kr.ac.ajou.ajouinoclient.util.ApiCaller;
-import kr.ac.ajou.ajouinoclient.util.ApiException;
-import kr.ac.ajou.ajouinoclient.util.Callback;
 
 /**
  * Created by YoungRok on 2014-11-27.
@@ -50,6 +45,7 @@ public class LampFragment extends DeviceFragment {
                 //String rgbString = "R: " + Color.red(color) + " G: " + Color.green(color) + " B: " + Color.blue(color) + " A: " + mBrightnessBar.getProgress();
                 Event event = new Event(mDeviceId, "color", color);
                 mListener.onToggleEvent(event);
+
             }
         });
 
