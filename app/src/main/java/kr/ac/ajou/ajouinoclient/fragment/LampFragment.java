@@ -14,6 +14,8 @@ import android.widget.SeekBar;
 //import com.larswerkman.holocolorpicker.ValueBar;
 import com.chiralcode.colorpicker.ColorPicker;
 
+import java.util.Collections;
+
 import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.model.Event;
 
@@ -42,6 +44,8 @@ public class LampFragment extends DeviceFragment {
                 color &= 0x00FFFFFF;
                 color |= (mBrightnessBar.getProgress() << 24);
 
+                setValuesToComponents();
+
                 //String rgbString = "R: " + Color.red(color) + " G: " + Color.green(color) + " B: " + Color.blue(color) + " A: " + mBrightnessBar.getProgress();
                 Event event = new Event(mDeviceId, "color", color);
                 mListener.onToggleEvent(event);
@@ -50,5 +54,33 @@ public class LampFragment extends DeviceFragment {
         });
 
         return rootView;
+    }
+
+    public void setValuesToComponents() {
+        // set original value of device
+        int value = 0xFFFFFFFF;
+        if(mDevice != null) {
+            if (mDevice.getValues().get("value") != null) {
+                value = mDevice.getValues().get("value");
+            }
+
+            // get event if user sent some event after connection
+            Event event = null;
+            if (mDevice.getEvents() != null && mDevice.getEvents().size() > 0) {
+                Collections.sort(mDevice.getEvents());
+                event = mDevice.getEvents().get(0);
+            }
+
+            // overwrite the value if user send events after connection
+            if (event != null && event.getValue() != null) {
+                value = event.getValue();
+            }
+
+        }
+        int color = value |= 0xFF000000;
+        int brightness = value >> 24 & 0xFF;
+
+        mColorPicker.setColor(color);
+        mBrightnessBar.setProgress(brightness);
     }
 }

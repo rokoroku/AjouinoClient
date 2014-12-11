@@ -1,4 +1,4 @@
-package kr.ac.ajou.ajouinoclient;
+package kr.ac.ajou.ajouinoclient.activity;
 
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
@@ -19,6 +19,7 @@ import com.nispok.snackbar.listeners.ActionClickListener;
 import java.util.Collection;
 import java.util.Iterator;
 
+import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.adapter.DeviceGridAdapter;
 import kr.ac.ajou.ajouinoclient.model.Device;
 import kr.ac.ajou.ajouinoclient.model.DeviceInfo;

@@ -12,6 +12,7 @@ import com.nispok.snackbar.Snackbar;
 
 import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.adapter.PowerstripOutletAdapter;
+import kr.ac.ajou.ajouinoclient.model.Event;
 
 /**
  * Created by YoungRok on 2014-11-27.
@@ -27,6 +28,7 @@ public class PowerstripFragment extends DeviceFragment implements AdapterView.On
 
         mListView = (ListView) rootView.findViewById(R.id.listView);
         mPowerstripOutletAdapter = new PowerstripOutletAdapter(getActivity());
+
         mPowerstripOutletAdapter.setItem(mDevice);
         mPowerstripOutletAdapter.setValueChangedListener(this);
         mListView.setAdapter(mPowerstripOutletAdapter);
@@ -45,5 +47,9 @@ public class PowerstripFragment extends DeviceFragment implements AdapterView.On
         Snackbar.with(getActivity())
                 .text(String.format("value %d", mPowerstripOutletAdapter.getValue()))
                 .show(getActivity());
+
+        Event event = new Event(mDeviceId, Event.TYPE_POWER, mPowerstripOutletAdapter.getValue());
+        mListener.onToggleEvent(event);
+
     }
 }

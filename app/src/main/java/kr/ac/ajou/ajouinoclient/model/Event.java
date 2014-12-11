@@ -62,6 +62,6 @@ public class Event implements Comparable {
 
     @Override
     public int compareTo(Object o) {
-        return this.timestamp.compareTo(((Event)o).getTimestamp()) * -1;
+        return ((Event)o).getTimestamp().compareTo(timestamp);
     }
 }

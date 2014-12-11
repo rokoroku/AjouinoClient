@@ -1,4 +1,4 @@
-package kr.ac.ajou.ajouinoclient;
+package kr.ac.ajou.ajouinoclient.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.util.ApiCaller;
 import kr.ac.ajou.ajouinoclient.util.ApiException;
 import kr.ac.ajou.ajouinoclient.util.GcmUtils;

@@ -1,7 +1,9 @@
 package kr.ac.ajou.ajouinoclient.fragment;
 
+import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,7 @@ import java.text.SimpleDateFormat;
 import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.adapter.IntercomGuestAdapter;
 import kr.ac.ajou.ajouinoclient.model.Event;
+import kr.ac.ajou.ajouinoclient.service.GcmIntentService;
 import kr.ac.ajou.ajouinoclient.util.ApiCaller;
 import kr.ac.ajou.ajouinoclient.util.Callback;
 import kr.ac.ajou.ajouinoclient.util.ImageDownloader;
@@ -26,10 +29,11 @@ import kr.ac.ajou.ajouinoclient.util.ImageDownloader;
 /**
  * Created by YoungRok on 2014-11-27.
  */
-public class IntercomFragment extends DeviceFragment implements AdapterView.OnItemClickListener {
+public class IntercomFragment extends DeviceFragment implements AdapterView.OnItemClickListener, GcmIntentService.onNewGcmMessageListener {
 
     private ListView mListView;
     private IntercomGuestAdapter mIntercomGuestAdapter;
+    private Handler mHandler = new Handler();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -92,11 +96,41 @@ public class IntercomFragment extends DeviceFragment implements AdapterView.OnIt
             TextView descriptionView = (TextView) dialog.getCustomView().findViewById(R.id.textView);
 
             // setting up custom dialog view component
-            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH시 mm분");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
             imageView.setImageDrawable(drawable);
             descriptionView.setText(dateFormat.format(event.getTimestamp()));
 
             dialog.show();
+        }
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        GcmIntentService.addOnNewGcmMessageListener(this);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        GcmIntentService.removeOnNewGcmMessageListener(this);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(mIntercomGuestAdapter != null) mIntercomGuestAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onNewEvent(Event event) {
+        if(mHandler != null) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if(mIntercomGuestAdapter != null) mIntercomGuestAdapter.notifyDataSetChanged();
+                }
+            });
         }
     }
 }

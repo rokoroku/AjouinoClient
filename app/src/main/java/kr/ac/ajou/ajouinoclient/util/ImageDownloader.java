@@ -23,6 +23,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -31,6 +32,7 @@ import android.graphics.drawable.Drawable;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -151,6 +153,11 @@ public class ImageDownloader {
         return null;
     }
 
+    public void downloadBitmapAsync(String url, Callback callback) {
+        BitmapDownloaderTask task = new BitmapDownloaderTask(callback);
+        task.execute(url);
+    }
+
     Bitmap downloadBitmap(String url) {
         final int IO_BUFFER_SIZE = 4 * 1024;
 
@@ -235,9 +242,16 @@ public class ImageDownloader {
     class BitmapDownloaderTask extends AsyncTask<String, Void, Bitmap> {
         private String url;
         private final WeakReference<ImageView> imageViewReference;
+        private final Callback callback;
 
         public BitmapDownloaderTask(ImageView imageView) {
             imageViewReference = new WeakReference<ImageView>(imageView);
+            callback = null;
+        }
+
+        public BitmapDownloaderTask(Callback callback) {
+            imageViewReference = null;
+            this.callback = callback;
         }
 
         /**
@@ -268,6 +282,9 @@ public class ImageDownloader {
                 if ((this == bitmapDownloaderTask) || (mode != Mode.CORRECT)) {
                     imageView.setImageBitmap(bitmap);
                 }
+            }
+            if (callback != null ) {
+                callback.onSuccess(bitmap);
             }
         }
     }
@@ -307,11 +324,11 @@ public class ImageDownloader {
      * Garbage Collector.
      */
 
-    private static final int HARD_CACHE_CAPACITY = 10;
-    private static final int DELAY_BEFORE_PURGE = 30 * 1000; // in milliseconds
+    private static final int HARD_CACHE_CAPACITY = 20;
+    private static final int DELAY_BEFORE_PURGE = 5 * 60 * 1000; // in milliseconds
 
     // Hard cache, with a fixed maximum capacity and a life duration
-    private final HashMap<String, Bitmap> sHardBitmapCache =
+    private static final HashMap<String, Bitmap> sHardBitmapCache =
             new LinkedHashMap<String, Bitmap>(HARD_CACHE_CAPACITY / 2, 0.75f, true) {
                 @Override
                 protected boolean removeEldestEntry(LinkedHashMap.Entry<String, Bitmap> eldest) {
@@ -397,5 +414,14 @@ public class ImageDownloader {
     private void resetPurgeTimer() {
         purgeHandler.removeCallbacks(purger);
         purgeHandler.postDelayed(purger, DELAY_BEFORE_PURGE);
+    }
+
+    /**
+     * get dpi scaling factor for each devices
+     */
+    public static float getImageFactor(Resources r){
+        DisplayMetrics metrics = r.getDisplayMetrics();
+        float multiplier=metrics.density/3f;
+        return multiplier;
     }
 }

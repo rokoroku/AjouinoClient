@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.List;
 
 import kr.ac.ajou.ajouinoclient.R;
@@ -27,7 +28,7 @@ public class IntercomGuestAdapter extends BaseAdapter {
     private Context mContext;
     private LayoutInflater mInflater;
     private List<Event> mItems;
-    private ImageDownloader mImageDownloader = null;
+    private static ImageDownloader mImageDownloader = null;
 
     public IntercomGuestAdapter(Context context) {
         mContext = context;
@@ -42,6 +43,7 @@ public class IntercomGuestAdapter extends BaseAdapter {
 
     public void setItem(Device device) {
         mItems = device.getEvents();
+        Collections.sort(mItems);
     }
 
     public int getCount() {
@@ -79,11 +81,10 @@ public class IntercomGuestAdapter extends BaseAdapter {
 
             Event entry = getItem(position);
 
-            imageResUrl = ApiCaller.getStaticInstance().getHostAddress() + "event/image/" + entry.getTimestamp().getTime();
+            imageResUrl = ApiCaller.getStaticInstance().getHostAddress() + "event/image/" + entry.getDeviceID() + "_" + entry.getTimestamp().getTime();
             label = entry.getType();
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH시 mm분");
             description = dateFormat.format(entry.getTimestamp());
-
         }
 
         if (imageView != null && imageResUrl != null) {

@@ -1,4 +1,4 @@
-package kr.ac.ajou.ajouinoclient;
+package kr.ac.ajou.ajouinoclient.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,20 +18,19 @@ import com.nispok.snackbar.listeners.ActionClickListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
+import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.adapter.DeviceGridAdapter;
 import kr.ac.ajou.ajouinoclient.model.Device;
 import kr.ac.ajou.ajouinoclient.model.DeviceInfo;
-import kr.ac.ajou.ajouinoclient.model.Event;
 import kr.ac.ajou.ajouinoclient.util.ApiCaller;
 import kr.ac.ajou.ajouinoclient.util.Callback;
 import kr.ac.ajou.ajouinoclient.persistent.DeviceManager;
 
 
 public class DeviceListActivity extends ActionBarActivity implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener, ActionMode.Callback {
+
+    public static final int RESULT_REMOVE = 1010;
 
     private GridView mGridView;
     private ProgressBar mProgressBar;
@@ -75,7 +74,7 @@ public class DeviceListActivity extends ActionBarActivity implements AdapterView
     @Override
     protected void onResume() {
         super.onResume();
-        if(mGridAdapter != null) mGridAdapter.notifyDataSetChanged();
+        if (mGridAdapter != null) mGridAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -88,10 +87,20 @@ public class DeviceListActivity extends ActionBarActivity implements AdapterView
                 mGridAdapter.notifyDataSetChanged();
                 Snackbar.with(DeviceListActivity.this)
                         .text(String.format("%s added", data.getStringExtra("deviceId")))
-                        .actionLabel("Close")
                         .actionColor(R.color.accent)
                         .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                         .show(DeviceListActivity.this);
+            }
+        }
+        if (resultCode == DeviceListActivity.RESULT_REMOVE) {
+            mProgressBar.setVisibility(View.VISIBLE);
+            mGridView.setClickable(false);
+            mGridView.setLongClickable(false);
+
+            String deviceId = data.getStringExtra("deviceId");
+            if(deviceId != null) {
+                Device device = DeviceManager.getInstance().getDevice(deviceId);
+                removeDevice(device);
             }
         }
     }
@@ -131,7 +140,7 @@ public class DeviceListActivity extends ActionBarActivity implements AdapterView
         if (device != null) {
             Intent intent = new Intent(this, DeviceActivity.class);
             intent.putExtra(DeviceActivity.PARAM_DEVICE_ID, device.getId());
-            startActivity(intent);
+            startActivityForResult(intent, 0);
         }
     }
 
@@ -172,34 +181,8 @@ public class DeviceListActivity extends ActionBarActivity implements AdapterView
                 SparseBooleanArray selected = mGridAdapter.getSelectedIds();
                 for (int i = (selected.size() - 1); i >= 0; i--) {
                     if (selected.valueAt(i)) {
-                        mProgressBar.setVisibility(View.VISIBLE);
-                        mGridView.setClickable(false);
-                        mGridView.setLongClickable(false);
-                        final DeviceInfo selectedItem = mGridAdapter.getItem(selected.keyAt(i));
-                        ApiCaller.getStaticInstance().removeDeviceAsync(selectedItem, new Callback() {
-                            @Override
-                            public void onSuccess(Object result) {
-                                mProgressBar.setVisibility(View.GONE);
-                                mGridView.setLongClickable(true);
-                                mGridView.setClickable(true);
-
-                                Device device = DeviceManager.getInstance().removeDevice(selectedItem.getId());
-                                mGridAdapter.setListItems(DeviceManager.getInstance().getDevices());
-                                mGridAdapter.notifyDataSetChanged();
-                                onRemoveDevice(device);
-                            }
-
-                            @Override
-                            public void onFailure() {
-                                mProgressBar.setVisibility(View.GONE);
-                                mGridView.setLongClickable(true);
-                                mGridView.setClickable(true);
-                                Snackbar.with(DeviceListActivity.this)
-                                        .text("Failed to remove device")
-                                        .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
-                                        .show(DeviceListActivity.this);
-                            }
-                        });
+                        DeviceInfo selectedItem = mGridAdapter.getItem(selected.keyAt(i));
+                        removeDevice(selectedItem);
                     }
                 }
                 actionMode.finish(); // Action picked, so close the CAB
@@ -213,6 +196,36 @@ public class DeviceListActivity extends ActionBarActivity implements AdapterView
     public void onDestroyActionMode(ActionMode actionMode) {
         mGridAdapter.removeSelection();
         mActionMode = null;
+    }
+
+    private void removeDevice(final DeviceInfo deviceInfo) {
+        mProgressBar.setVisibility(View.VISIBLE);
+        mGridView.setClickable(false);
+        mGridView.setLongClickable(false);
+        ApiCaller.getStaticInstance().removeDeviceAsync(deviceInfo, new Callback() {
+            @Override
+            public void onSuccess(Object result) {
+                mProgressBar.setVisibility(View.GONE);
+                mGridView.setLongClickable(true);
+                mGridView.setClickable(true);
+
+                Device device = DeviceManager.getInstance().removeDevice(deviceInfo.getId());
+                mGridAdapter.setListItems(DeviceManager.getInstance().getDevices());
+                mGridAdapter.notifyDataSetChanged();
+                onRemoveDevice(device);
+            }
+
+            @Override
+            public void onFailure() {
+                mProgressBar.setVisibility(View.GONE);
+                mGridView.setLongClickable(true);
+                mGridView.setClickable(true);
+                Snackbar.with(DeviceListActivity.this)
+                        .text("Failed to remove device")
+                        .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
+                        .show(DeviceListActivity.this);
+            }
+        });
     }
 
     private void reloadDevices() {
@@ -230,12 +243,12 @@ public class DeviceListActivity extends ActionBarActivity implements AdapterView
             @Override
             public void onSuccess(Object result) {
 
-                if(!loadingSnackbar.isDismissed()) {
+                if (!loadingSnackbar.isDismissed()) {
                     loadingSnackbar.dismiss();
                 }
 
                 Collection<Device> devices = (Collection<Device>) result;
-                if(devices == null) {
+                if (devices == null) {
                     devices = new ArrayList<Device>();
                     Snackbar.with(DeviceListActivity.this)
                             .text("No devices are registered.")

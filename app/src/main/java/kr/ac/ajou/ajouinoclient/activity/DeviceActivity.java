@@ -1,4 +1,4 @@
-package kr.ac.ajou.ajouinoclient;
+package kr.ac.ajou.ajouinoclient.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,7 +6,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -15,6 +14,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.listeners.ActionClickListener;
 
+import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.fragment.DeviceFragment;
 import kr.ac.ajou.ajouinoclient.fragment.NavigationDrawerFragment;
 import kr.ac.ajou.ajouinoclient.model.Device;
@@ -107,22 +107,10 @@ public class DeviceActivity extends ActionBarActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_delete) {
-            ApiCaller.getStaticInstance().removeDeviceAsync(mDevice, new Callback() {
-                @Override
-                public void onSuccess(Object result) {
-                    Device device = DeviceManager.getInstance().removeDevice(mDevice.getId());
-                    onRemoveDevice(device);
-                    finish();
-                }
-
-                @Override
-                public void onFailure() {
-                    Snackbar.with(DeviceActivity.this)
-                            .text("Failed to remove device")
-                            .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
-                            .show(DeviceActivity.this);
-                }
-            });
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra("deviceId", mDevice.getId());
+            setResult(DeviceListActivity.RESULT_REMOVE, returnIntent);
+            finish();
             return true;
 
         } else if (id == R.id.action_refresh) {

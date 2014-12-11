@@ -11,6 +11,8 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import java.util.Collections;
+
 import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.model.Device;
 import kr.ac.ajou.ajouinoclient.model.Event;
@@ -44,16 +46,25 @@ public class PowerstripOutletAdapter extends BaseAdapter {
 
         mListItems = new SparseBooleanArray();
 
+        // set original value of device
+        int value = 0;
+        if(device.getValues().get("value") != null) {
+            value = device.getValues().get("value");
+        }
+
+        // get event if user sent some event after connection
         Event event = null;
         if(device.getEvents() != null && device.getEvents().size() > 0) {
+            Collections.sort(device.getEvents());
             event = device.getEvents().get(0);
         }
 
-        int value = 0;
+        // overwrite the value if user send events after connection
         if(event != null && event.getValue() != null) {
             value = event.getValue();
         }
 
+        // set values to the adapter's boolean array
         for(int i=0; i<ports; i++) {
             mListItems.put(i, (value & 1) == 1);
             value = value >> 1;

@@ -18,10 +18,11 @@
         android:name=".persistent.PreferenceManager"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
+        android:logo="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".DeviceListActivity"
+            android:name=".activity.DeviceListActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,21 +31,21 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name=".activity.LoginActivity"
             android:label="@string/title_activity_login"
             android:windowSoftInputMode="adjustResize|stateVisible" >
         </activity>
         <activity
-            android:name=".DeviceActivity"
+            android:name=".activity.DeviceActivity"
             android:label="@string/title_activity_device" >
         </activity>
         <activity
-            android:name=".DeviceLookupActivity"
+            android:name=".activity.DeviceLookupActivity"
             android:label="@string/title_activity_device_lookup"
-            android:parentActivityName=".DeviceListActivity" >
+            android:parentActivityName=".activity.DeviceListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".DeviceListActivity" />
+                android:value=".activity.DeviceListActivity" />
         </activity>
 
         <receiver
