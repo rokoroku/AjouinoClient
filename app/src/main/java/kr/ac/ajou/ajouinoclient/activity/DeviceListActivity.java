@@ -27,7 +27,9 @@ import kr.ac.ajou.ajouinoclient.util.ApiCaller;
 import kr.ac.ajou.ajouinoclient.util.Callback;
 import kr.ac.ajou.ajouinoclient.persistent.DeviceManager;
 
-
+/**
+ * Activity for showing list of devices
+ */
 public class DeviceListActivity extends ActionBarActivity implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener, ActionMode.Callback {
 
     public static final int RESULT_REMOVE = 1010;

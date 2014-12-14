@@ -23,7 +23,9 @@ import kr.ac.ajou.ajouinoclient.persistent.DeviceManager;
 import kr.ac.ajou.ajouinoclient.util.ApiCaller;
 import kr.ac.ajou.ajouinoclient.util.Callback;
 
-
+/**
+ * Activity for showing device's detailed fragment
+ */
 public class DeviceActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         DeviceFragment.OnDeviceFragmentInteractionListener {

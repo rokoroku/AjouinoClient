@@ -1,7 +1,7 @@
 package kr.ac.ajou.ajouinoclient.util;
 
 /**
- * Created by YoungRok on 2014-11-26.
+ * Exception class for ApiCaller
  */
 public class ApiException extends Exception {
 

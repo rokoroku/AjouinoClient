@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import java.util.Map;
 
 /**
- * Created by YoungRok on 2014-11-26.
+ * Manages persistent preference of application
  */
 public class PreferenceManager extends Application {
     public final static String PREFERENCE_HOST_ADDRESS = "hostaddr";

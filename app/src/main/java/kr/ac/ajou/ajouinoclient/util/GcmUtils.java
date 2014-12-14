@@ -12,9 +12,6 @@ import java.io.IOException;
 import kr.ac.ajou.ajouinoclient.model.User;
 import kr.ac.ajou.ajouinoclient.persistent.PreferenceManager;
 
-/**
- * Created by YoungRok on 2014-12-05.
- */
 public class GcmUtils {
 
     private final static String SENDER_ID = "397044167566";

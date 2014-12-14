@@ -27,7 +27,7 @@ import kr.ac.ajou.ajouinoclient.util.Callback;
 import kr.ac.ajou.ajouinoclient.util.ImageDownloader;
 
 /**
- * Created by YoungRok on 2014-11-27.
+ * Fragment controls intercom.
  */
 public class IntercomFragment extends DeviceFragment implements AdapterView.OnItemClickListener, GcmIntentService.onNewGcmMessageListener {
 

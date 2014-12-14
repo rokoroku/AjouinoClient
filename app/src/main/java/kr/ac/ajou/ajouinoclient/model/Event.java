@@ -3,7 +3,7 @@ package kr.ac.ajou.ajouinoclient.model;
 import java.util.Date;
 
 /**
- * Created by YoungRok on 2014-11-25.
+ * Device's event
  */
 public class Event implements Comparable {
 

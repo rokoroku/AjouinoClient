@@ -33,7 +33,7 @@ import kr.ac.ajou.ajouinoclient.model.Event;
 import kr.ac.ajou.ajouinoclient.model.User;
 
 /**
- * Created by YoungRok on 2014-11-26.
+ * Call Server's REST Api
  */
 public class ApiCaller {
 

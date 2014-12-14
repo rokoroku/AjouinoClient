@@ -20,7 +20,7 @@ import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.model.Event;
 
 /**
- * Created by YoungRok on 2014-11-27.
+ * Fragment controls lamp.
  */
 public class LampFragment extends DeviceFragment {
 

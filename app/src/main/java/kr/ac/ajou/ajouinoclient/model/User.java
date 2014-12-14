@@ -1,6 +1,8 @@
 package kr.ac.ajou.ajouinoclient.model;
 
 /**
+ * User
+ *
  * Created by YoungRok on 2014-12-05.
  */
 public class User {

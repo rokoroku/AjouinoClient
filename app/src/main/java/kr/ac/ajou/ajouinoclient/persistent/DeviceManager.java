@@ -7,7 +7,7 @@ import java.util.Map;
 import kr.ac.ajou.ajouinoclient.model.Device;
 
 /**
- * Created by YoungRok on 2014-11-26.
+ * Manages list of devices given from server.
  */
 public class DeviceManager {
     private static DeviceManager mInstance;

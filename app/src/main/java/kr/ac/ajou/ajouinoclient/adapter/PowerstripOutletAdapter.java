@@ -18,7 +18,7 @@ import kr.ac.ajou.ajouinoclient.model.Device;
 import kr.ac.ajou.ajouinoclient.model.Event;
 
 /**
- * Created by YoungRok on 2014-11-26.
+ * Adapter Class for power-strip's each port
  */
 public class PowerstripOutletAdapter extends BaseAdapter {
 

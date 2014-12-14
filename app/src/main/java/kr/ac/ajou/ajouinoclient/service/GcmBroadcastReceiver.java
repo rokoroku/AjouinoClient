@@ -13,7 +13,9 @@ import java.util.HashSet;
 import kr.ac.ajou.ajouinoclient.model.Event;
 
 /**
- * Created by YoungRok on 2014-12-05.
+ * Receiver of GCM Message
+ * Will wake GcmIntentService.
+ *
  */
 public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
 

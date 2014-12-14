@@ -27,7 +27,7 @@ import kr.ac.ajou.ajouinoclient.persistent.PreferenceManager;
 
 
 /**
- * A login screen that offers login via email/password.
+ * A login screen that offers login
  */
 public class LoginActivity extends ActionBarActivity {
 

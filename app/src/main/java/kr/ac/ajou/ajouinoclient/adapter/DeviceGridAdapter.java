@@ -20,7 +20,7 @@ import kr.ac.ajou.ajouinoclient.R;
 import kr.ac.ajou.ajouinoclient.model.DeviceInfo;
 
 /**
- * Created by YoungRok on 2014-11-26.
+ * Adapter class for Device gridview for DeviceListActivity, DeviceLookupActivity, and so on.
  */
 public class DeviceGridAdapter extends BaseAdapter {
 

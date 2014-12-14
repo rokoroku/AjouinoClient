@@ -21,7 +21,7 @@ import kr.ac.ajou.ajouinoclient.util.ApiCaller;
 import kr.ac.ajou.ajouinoclient.util.ImageDownloader;
 
 /**
- * Created by YoungRok on 2014-11-26.
+ * Adapter class for Intercom's event
  */
 public class IntercomGuestAdapter extends BaseAdapter {
 

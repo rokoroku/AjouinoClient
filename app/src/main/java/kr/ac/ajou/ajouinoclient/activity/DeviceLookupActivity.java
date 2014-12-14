@@ -27,6 +27,9 @@ import kr.ac.ajou.ajouinoclient.util.ApiCaller;
 import kr.ac.ajou.ajouinoclient.util.Callback;
 import kr.ac.ajou.ajouinoclient.persistent.DeviceManager;
 
+/**
+ * Activity for looking up new device
+ */
 public class DeviceLookupActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
 
     public static final int REQUEST_NEW_DEVICE = 1000;

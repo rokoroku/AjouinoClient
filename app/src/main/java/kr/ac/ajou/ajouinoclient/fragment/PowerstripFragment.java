@@ -15,7 +15,7 @@ import kr.ac.ajou.ajouinoclient.adapter.PowerstripOutletAdapter;
 import kr.ac.ajou.ajouinoclient.model.Event;
 
 /**
- * Created by YoungRok on 2014-11-27.
+ * Fragment controls power-strip.
  */
 public class PowerstripFragment extends DeviceFragment implements AdapterView.OnItemClickListener, PowerstripOutletAdapter.OnValueChangedListener {
 
